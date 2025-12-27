@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bahi Khata Pro | Smart Ledger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bahi Khata Pro | Digital Ledger</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -11,27 +11,30 @@
 
     <div id="auth-view" class="auth-overlay">
         <div id="login-form" class="auth-card">
-            <h2>Bahi Khata Login</h2>
+            <h2 style="color:var(--primary)">Shop Login</h2>
             <input type="text" id="l-user" placeholder="Username">
             <input type="password" id="l-pass" placeholder="Password">
             <button class="btn-main" onclick="handleLogin()">Login</button>
-            <p style="margin-top:20px;">New Shop? <a href="#" onclick="toggleAuth(true)">Register</a></p>
+            <p style="margin-top:20px; font-size: 0.9rem;">New Shopkeeper? <a href="#" onclick="toggleAuth(true)">Register Now</a></p>
         </div>
+
         <div id="signup-form" class="auth-card" style="display:none;">
-            <h2>Register Shop</h2>
+            <h2 style="color:var(--primary)">Register Business</h2>
             <input type="text" id="s-name" placeholder="Shop Name">
-            <input type="text" id="s-user" placeholder="Username">
-            <input type="password" id="s-pass" placeholder="Password">
+            <input type="text" id="s-user" placeholder="Set Username">
+            <input type="password" id="s-pass" placeholder="Set Password">
             <button class="btn-main" onclick="handleSignup()">Sign Up</button>
-            <p style="margin-top:20px;"><a href="#" onclick="toggleAuth(false)">Back to Login</a></p>
+            <p style="margin-top:20px; font-size: 0.9rem;">Already have a shop? <a href="#" onclick="toggleAuth(false)">Login</a></p>
         </div>
     </div>
 
     <div id="app-view" style="display:none;">
         <nav class="navbar">
-            <h3 id="shop-display-name" style="margin:0; color:var(--primary)">Shop Name</h3>
+            <div class="brand">
+                <h3 id="shop-display-name" style="margin:0; color:var(--primary)">Shop Name</h3>
+            </div>
             <div class="nav-links">
-                <button id="nav-dash" class="active" onclick="showSection('dash')">Dashboard</button>
+                <button id="nav-dash" class="active" onclick="showSection('dash')">Home</button>
                 <button id="nav-ledger" onclick="showSection('ledger')">Customer Ledger</button>
                 <button onclick="location.reload()" style="color:var(--debit-color)">Logout</button>
             </div>
@@ -39,13 +42,13 @@
 
         <div class="container">
             <div class="balance-card">
-                <h4 style="opacity:0.7; letter-spacing: 1px;">NET BUSINESS BALANCE</h4>
+                <h4 style="opacity: 0.8; letter-spacing: 1px; font-size: 0.8rem;">NET BUSINESS BALANCE</h4>
                 <h1 id="net-balance">$0</h1>
             </div>
 
             <div id="section-dash" class="view-section active">
                 <div class="card">
-                    <h3>New Entry</h3>
+                    <h3>⚡ Quick Entry</h3>
                     <div class="transaction-form">
                         <div class="type-selector">
                             <button id="type-debit" class="type-btn active debit" onclick="setEntryType('debit')">DEBIT (Out)</button>
@@ -55,30 +58,35 @@
                             <input type="text" id="c-name" placeholder="Customer Name" autocomplete="off" oninput="showSuggestions(this.value)">
                             <ul id="suggestions" class="suggestions-list" style="display:none;"></ul>
                         </div>
-                        <input type="text" id="i-detail" placeholder="Entry Detail (Items , cash)">
-                        <input type="number" id="t-amount" placeholder="Amount ($)" style="grid-column: span 2;">
-                        <button class="btn-main" style="grid-column: span 2;" onclick="saveTransaction()">Save To Ledger</button>
+                        <input type="text" id="i-detail" placeholder="Entry Detail (e.g. Rice, Cash)">
+                        <input type="number" id="t-amount" placeholder="Amount ($)" class="full-width-mobile">
+                        <button class="btn-main full-width" onclick="saveTransaction()">Save Transaction</button>
                     </div>
                 </div>
-                <div class="card">
-                    <h3>Recent Transactions</h3>
-                    <table>
-                        <thead><tr><th>Date & Time</th><th>Customer</th><th>Detail</th><th>Type</th><th>Amount</th></tr></thead>
-                        <tbody id="history-body"></tbody>
-                    </table>
+
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Recent History</h3>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Date & Time</th><th>Customer</th><th>Detail</th><th>Type</th><th>Amount</th></tr></thead>
+                            <tbody id="history-body"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <div id="section-ledger" class="view-section">
                 <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h3>Customer Ledger</h3>
-                        <input type="text" id="search-box" placeholder="Search customer..." onkeyup="renderLedger()" style="width:200px; margin:0;">
+                    <div class="ledger-header">
+                        <h3>Customer Directory</h3>
+                        <input type="text" id="search-box" placeholder="🔍 Search customer..." onkeyup="renderLedger()">
                     </div>
-                    <table>
-                        <thead><tr><th>Customer Name</th><th>Status</th><th>Net Balance</th><th>Details</th></tr></thead>
-                        <tbody id="ledger-body"></tbody>
-                    </table>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Customer Name</th><th>Status</th><th>Balance</th><th>Action</th></tr></thead>
+                            <tbody id="ledger-body"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -87,14 +95,16 @@
     <div id="statement-modal" class="modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal()">&times;</button>
-            <button onclick="window.print()" style="margin-bottom:15px; cursor:pointer; padding: 5px 10px;">🖨️ Print Statement</button>
-            <h2 id="modal-cust-name">Name</h2>
-            <p id="modal-cust-status"></p>
+            <button class="btn-print" onclick="window.print()">🖨️ Print Statement</button>
+            <h2 id="modal-cust-name" style="margin-bottom: 5px;">Customer Name</h2>
+            <p id="modal-cust-status" style="font-weight: bold;"></p>
             <hr>
-            <table>
-                <thead><tr><th>Date & Time</th><th>Detail</th><th>Type</th><th>Amount</th></tr></thead>
-                <tbody id="modal-body"></tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Date & Time</th><th>Detail</th><th>Type</th><th>Amount</th></tr></thead>
+                    <tbody id="modal-body"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
