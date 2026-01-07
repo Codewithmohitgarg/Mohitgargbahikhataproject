@@ -35,20 +35,20 @@
             </div>
             <div class="nav-links">
                 <button id="nav-dash" class="active" onclick="showSection('dash')">Home</button>
-                <button id="nav-ledger" onclick="showSection('ledger')">Customer Ledger</button>
+                <button id="nav-ledger" onclick="showSection('ledger')">Ledger</button>
                 <button onclick="location.reload()" style="color:var(--debit-color)">Logout</button>
             </div>
         </nav>
 
         <div class="container">
             <div class="balance-card">
-                <h4 style="opacity: 0.8; letter-spacing: 1px; font-size: 0.8rem;">NET BUSINESS BALANCE</h4>
+                <p style="opacity: 0.8; letter-spacing: 1px; font-size: 0.75rem; margin-bottom: 5px;">NET BUSINESS BALANCE</p>
                 <h1 id="net-balance">$0</h1>
             </div>
 
             <div id="section-dash" class="view-section active">
                 <div class="card">
-                    <h3>⚡ Quick Entry</h3>
+                    <h3 style="margin-top:0;">⚡ Quick Entry</h3>
                     <div class="transaction-form">
                         <div class="type-selector">
                             <button id="type-debit" class="type-btn active debit" onclick="setEntryType('debit')">DEBIT (Out)</button>
@@ -58,9 +58,9 @@
                             <input type="text" id="c-name" placeholder="Customer Name" autocomplete="off" oninput="showSuggestions(this.value)">
                             <ul id="suggestions" class="suggestions-list" style="display:none;"></ul>
                         </div>
-                        <input type="number" id="c-phone" placeholder="WhatsApp Number (eg: 919876...)">
-                        <input type="text" id="i-detail" placeholder="Entry Detail (eg: Ration, Cash)">
-                        <input type="number" id="t-amount" placeholder="Amount ($)" class="full-width-mobile">
+                        <input type="number" id="c-phone" placeholder="WhatsApp Number">
+                        <input type="text" id="i-detail" placeholder="Entry Detail (e.g. Cash)" class="full-width">
+                        <input type="number" id="t-amount" placeholder="Amount ($)" class="full-width">
                         <button class="btn-main full-width" onclick="saveTransaction()">Save Transaction</button>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                     <h3>Recent History</h3>
                     <div class="table-wrapper">
                         <table>
-                            <thead><tr><th>Date & Time</th><th>Customer</th><th>Detail</th><th>Type</th><th>Amount</th></tr></thead>
+                            <thead><tr><th>Date</th><th>Customer</th><th>Detail</th><th>Type</th><th>Amount</th></tr></thead>
                             <tbody id="history-body"></tbody>
                         </table>
                     </div>
@@ -80,11 +80,11 @@
                 <div class="card">
                     <div class="ledger-header">
                         <h3>Customer Directory</h3>
-                        <input type="text" id="search-box" placeholder="Search..." onkeyup="renderLedger()">
+                        <input type="text" id="search-box" placeholder="Search customer..." onkeyup="renderLedger()">
                     </div>
                     <div class="table-wrapper">
                         <table>
-                            <thead><tr><th>Customer Name</th><th>Status</th><th>Balance</th><th>Action</th></tr></thead>
+                            <thead><tr><th>Customer</th><th>Status</th><th>Balance</th><th>Action</th></tr></thead>
                             <tbody id="ledger-body"></tbody>
                         </table>
                     </div>
@@ -96,13 +96,14 @@
     <div id="statement-modal" class="modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal()">&times;</button>
-            <button class="btn-print" onclick="window.print()">🖨️ Print Statement</button>
-            <h2 id="modal-cust-name">Name</h2>
-            <p id="modal-cust-status"></p>
+            <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 id="modal-cust-name" style="margin:0;">Name</h2>
+                <button class="btn-print" onclick="window.print()" style="padding: 8px 12px; border-radius: 8px; cursor: pointer;">🖨️ Print</button>
+            </div>
             <hr>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>Date & Time</th><th>Detail</th><th>Type</th><th>Amount</th></tr></thead>
+                    <thead><tr><th>Date</th><th>Detail</th><th>Type</th><th>Amount</th></tr></thead>
                     <tbody id="modal-body"></tbody>
                 </table>
             </div>

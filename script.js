@@ -3,7 +3,7 @@ let data = JSON.parse(localStorage.getItem('bk_data')) || {};
 let currentUser = null;
 let currentType = 'debit';
 
-// --- Auth Functions ---
+// Auth logic
 function toggleAuth(isSignup) {
     document.getElementById('login-form').style.display = isSignup ? 'none' : 'block';
     document.getElementById('signup-form').style.display = isSignup ? 'block' : 'none';
@@ -13,12 +13,12 @@ function handleSignup() {
     const shop = document.getElementById('s-name').value;
     const user = document.getElementById('s-user').value.trim();
     const pass = document.getElementById('s-pass').value;
-    if(!user || !pass || !shop) return alert("Fill details");
+    if(!user || !pass || !shop) return alert("Please fill all details");
     users[user] = { pass, shop };
     data[user] = {};
     localStorage.setItem('bk_users', JSON.stringify(users));
     localStorage.setItem('bk_data', JSON.stringify(data));
-    alert("Success! Login now.");
+    alert("Registration Successful! Please login.");
     toggleAuth(false);
 }
 
@@ -31,7 +31,7 @@ function handleLogin() {
         document.getElementById('app-view').style.display = 'block';
         document.getElementById('shop-display-name').innerText = users[u].shop;
         refreshUI();
-    } else alert("Invalid Login");
+    } else alert("Invalid Credentials");
 }
 
 function showSection(id) {
@@ -41,44 +41,44 @@ function showSection(id) {
     document.getElementById('nav-' + id).classList.add('active');
 }
 
-// --- Autocomplete ---
+// Transaction Logic
+function setEntryType(t) {
+    currentType = t;
+    document.getElementById('type-debit').classList.toggle('active', t==='debit');
+    document.getElementById('type-credit').classList.toggle('active', t==='credit');
+}
+
 function showSuggestions(val) {
     const list = document.getElementById('suggestions');
-    const customers = Object.keys(data[currentUser]);
+    const customers = Object.keys(data[currentUser] || {});
     list.innerHTML = '';
     if (!val) { list.style.display = 'none'; return; }
-    const filtered = customers.filter(c => c.toLowerCase().startsWith(val.toLowerCase()));
+    const filtered = customers.filter(c => c.toLowerCase().includes(val.toLowerCase()));
     if (filtered.length > 0) {
         list.style.display = 'block';
         filtered.forEach(name => {
             const li = document.createElement('li');
             li.innerText = name;
-            li.onclick = () => { document.getElementById('c-name').value = name; 
-                                 document.getElementById('c-phone').value = data[currentUser][name].phone || '';
-                                 list.style.display = 'none'; };
+            li.onclick = () => { 
+                document.getElementById('c-name').value = name; 
+                document.getElementById('c-phone').value = data[currentUser][name].phone || '';
+                list.style.display = 'none'; 
+            };
             list.appendChild(li);
         });
     } else { list.style.display = 'none'; }
 }
 
-function setEntryType(t) {
-    currentType = t;
-    document.getElementById('type-debit').classList.toggle('active', t==='debit');
-    document.getElementById('type-credit').classList.toggle('active', t==='get');
-}
-
-// --- Core Transaction ---
 function saveTransaction() {
     const name = document.getElementById('c-name').value.trim();
     const phone = document.getElementById('c-phone').value.trim();
     const amt = parseFloat(document.getElementById('t-amount').value);
-    const detail = document.getElementById('i-detail').value || '---';
+    const detail = document.getElementById('i-detail').value || 'General';
 
     if(!name || isNaN(amt) || !phone) return alert("Enter Name, Phone & Amount");
 
     if(!data[currentUser][name]) data[currentUser][name] = { phone: phone, entries: [] };
-    else data[currentUser][name].phone = phone;
-
+    
     const now = new Date();
     data[currentUser][name].entries.push({
         detail, amt, type: currentType, 
@@ -87,10 +87,8 @@ function saveTransaction() {
     });
 
     localStorage.setItem('bk_data', JSON.stringify(data));
-    document.getElementById('c-name').value = '';
-    document.getElementById('c-phone').value = '';
-    document.getElementById('t-amount').value = '';
-    document.activeElement.blur();
+    // Clear inputs
+    ['c-name', 'c-phone', 't-amount', 'i-detail'].forEach(id => document.getElementById(id).value = '');
     refreshUI();
 }
 
@@ -99,17 +97,20 @@ function refreshUI() {
     const histBody = document.getElementById('history-body');
     histBody.innerHTML = '';
     let allLogs = [];
+
     for(let name in data[currentUser]) {
         data[currentUser][name].entries.forEach(log => {
             net += (log.type === 'credit' ? log.amt : -log.amt);
             allLogs.push({name, ...log});
         });
     }
+
     const balEl = document.getElementById('net-balance');
-    balEl.innerText = (net >= 0 ? '+' : '-') + '$' + Math.abs(net);
+    balEl.innerText = (net >= 0 ? '+' : '-') + '$' + Math.abs(net).toLocaleString();
     balEl.style.color = net >= 0 ? 'var(--credit-color)' : 'var(--debit-color)';
     
-    allLogs.reverse().slice(0, 10).forEach(log => {
+    allLogs.sort((a,b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+    allLogs.slice(0, 10).forEach(log => {
         histBody.innerHTML += `<tr>
             <td>${log.date}<span class="time-text">${log.time}</span></td>
             <td><b>${log.name}</b></td><td>${log.detail}</td>
@@ -137,7 +138,7 @@ function renderLedger() {
             <td><b>$${Math.abs(bal)}</b></td>
             <td>
                 <a href="javascript:void(0)" class="whatsapp-btn" onclick="sendWhatsApp('${name}')">🟢</a>
-                <button class="dots-btn" onclick="openStatement('${name}')">&#8942;</button>
+                <button class="dots-btn" onclick="openStatement('${name}')">View</button>
             </td>
         </tr>`;
     }
@@ -146,7 +147,7 @@ function renderLedger() {
 function sendWhatsApp(name) {
     const cust = data[currentUser][name];
     let bal = cust.entries.reduce((acc, log) => log.type === 'credit' ? acc + log.amt : acc - log.amt, 0);
-    const msg = `Hello ${name}, your balance at ${users[currentUser].shop} is ₹${Math.abs(bal)} (${bal >= 0 ? 'Advance' : 'Pending'}). Please clear it.`;
+    const msg = `Hello ${name}, your balance at ${users[currentUser].shop} is ₹${Math.abs(bal)} (${bal >= 0 ? 'Advance' : 'Pending'}).`;
     window.open(`https://wa.me/${cust.phone}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -154,8 +155,8 @@ function openStatement(name) {
     const mBody = document.getElementById('modal-body');
     document.getElementById('modal-cust-name').innerText = name;
     mBody.innerHTML = '';
-    const logs = data[currentUser][name].entries;
-    logs.slice().reverse().forEach(log => {
+    const logs = [...data[currentUser][name].entries].reverse();
+    logs.forEach(log => {
         mBody.innerHTML += `<tr>
             <td>${log.date}<br><small>${log.time}</small></td>
             <td>${log.detail}</td>
