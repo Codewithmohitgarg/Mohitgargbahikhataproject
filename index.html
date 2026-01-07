@@ -58,13 +58,14 @@
                             <input type="text" id="c-name" placeholder="Customer Name" autocomplete="off" oninput="showSuggestions(this.value)">
                             <ul id="suggestions" class="suggestions-list" style="display:none;"></ul>
                         </div>
-                        <input type="text" id="i-detail" placeholder="Entry Detail (e.g. Rice, Cash)">
+                        <input type="number" id="c-phone" placeholder="WhatsApp Number (eg: 919876...)">
+                        <input type="text" id="i-detail" placeholder="Entry Detail (eg: Ration, Cash)">
                         <input type="number" id="t-amount" placeholder="Amount ($)" class="full-width-mobile">
                         <button class="btn-main full-width" onclick="saveTransaction()">Save Transaction</button>
                     </div>
                 </div>
 
-                <div class="card" style="margin-top: 20px;">
+                <div class="card">
                     <h3>Recent History</h3>
                     <div class="table-wrapper">
                         <table>
@@ -79,7 +80,7 @@
                 <div class="card">
                     <div class="ledger-header">
                         <h3>Customer Directory</h3>
-                        <input type="text" id="search-box" placeholder="🔍 Search customer..." onkeyup="renderLedger()">
+                        <input type="text" id="search-box" placeholder="Search..." onkeyup="renderLedger()">
                     </div>
                     <div class="table-wrapper">
                         <table>
@@ -96,8 +97,8 @@
         <div class="modal-content">
             <button class="close-modal" onclick="closeModal()">&times;</button>
             <button class="btn-print" onclick="window.print()">🖨️ Print Statement</button>
-            <h2 id="modal-cust-name" style="margin-bottom: 5px;">Customer Name</h2>
-            <p id="modal-cust-status" style="font-weight: bold;"></p>
+            <h2 id="modal-cust-name">Name</h2>
+            <p id="modal-cust-status"></p>
             <hr>
             <div class="table-wrapper">
                 <table>

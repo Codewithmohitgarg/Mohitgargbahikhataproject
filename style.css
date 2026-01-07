@@ -3,86 +3,64 @@
     --credit-color: #2ecc71; 
     --debit-color: #e74c3c;  
     --null-color: #95a5a6;
-    --dark: #2b2d42; 
-    --light: #f1f2f6; 
-    --white: #ffffff;
+    --dark: #2b2d42; --light: #f1f2f6; --white: #ffffff;
     --shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Inter', sans-serif; background-color: var(--light); margin: 0; padding: 0; }
 
-body { font-family: 'Inter', sans-serif; background-color: var(--light); margin: 0; padding: 0; color: var(--dark); }
-
-/* Authentication */
+/* Auth Views */
 .auth-overlay { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary), #3f37c9); padding: 20px; }
 .auth-card { background: var(--white); padding: 35px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); width: 100%; max-width: 380px; text-align: center; }
 
 input { width: 100%; padding: 14px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; font-size: 1rem; outline: none; }
-input:focus { border-color: var(--primary); }
+.btn-main { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
 
-.btn-main { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-.btn-main:hover { opacity: 0.9; }
-
-/* Navigation */
-.navbar { background: var(--white); padding: 10px 5%; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 1000; }
+/* Navbar Responsive */
+.navbar { background: var(--white); padding: 10px 5%; display: flex; flex-direction: column; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 1000; }
 @media (min-width: 768px) { .navbar { flex-direction: row; justify-content: space-between; } }
-
-.nav-links button { background: none; border: none; font-weight: 600; cursor: pointer; padding: 10px 15px; border-radius: 10px; font-size: 14px; }
+.nav-links button { background: none; border: none; font-weight: 600; cursor: pointer; padding: 10px 15px; border-radius: 10px; }
 .nav-links button.active { background: #eef2ff; color: var(--primary); }
 
-/* Layout */
+/* Layout & Cards */
 .container { max-width: 950px; margin: 20px auto; padding: 0 15px; }
 .balance-card { background: var(--dark); color: white; padding: 30px; border-radius: 24px; text-align: center; margin-bottom: 20px; }
-.balance-card h1 { font-size: calc(2rem + 1vw); margin: 10px 0 0; }
-
 .view-section { display: none; }
 .view-section.active { display: block; }
 .card { background: var(--white); padding: 25px; border-radius: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
 
-/* Form & Type Selectors */
+/* Form Grid */
 .transaction-form { display: flex; flex-direction: column; gap: 12px; }
-@media (min-width: 600px) {
-    .transaction-form { display: grid; grid-template-columns: 1fr 1fr; }
-    .full-width { grid-column: span 2; }
-}
-
+@media (min-width: 600px) { .transaction-form { display: grid; grid-template-columns: 1fr 1fr; } .full-width { grid-column: span 2; } }
 .type-selector { display: flex; gap: 10px; grid-column: span 2; }
-.type-btn { flex: 1; padding: 14px; border-radius: 12px; border: 2px solid #eee; background: #fff; cursor: pointer; font-weight: 800; }
+.type-btn { flex: 1; padding: 14px; border-radius: 12px; border: 2px solid #eee; font-weight: 800; cursor: pointer; }
 .type-btn.active.debit { background: var(--debit-color); border-color: var(--debit-color); color: white; }
 .type-btn.active.credit { background: var(--credit-color); border-color: var(--credit-color); color: white; }
 
-/* Autocomplete Darker */
+/* Suggestions Menu - Darker & Bold */
 .autocomplete-wrapper { position: relative; }
 .suggestions-list {
     position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ccc; 
-    border-radius: 0 0 12px 12px; z-index: 1001; list-style: none; padding: 0; margin: -10px 0 0 0;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto;
+    z-index: 1001; list-style: none; padding: 0; margin: -10px 0 0 0; box-shadow: 0 8px 16px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto;
 }
 .suggestions-list li { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f1f1; color: #000; font-weight: 700; font-size: 1.05rem; }
 .suggestions-list li:hover { background: var(--primary); color: #fff; }
 
 /* Responsive Tables */
-.table-wrapper { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch; }
+.table-wrapper { overflow-x: auto; width: 100%; }
 table { width: 100%; border-collapse: collapse; min-width: 500px; }
-th { text-align: left; padding: 15px; background: #f8f9fa; font-size: 0.85rem; color: #666; }
-td { padding: 15px; border-bottom: 1px solid #eee; font-size: 0.95rem; }
+th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+.time-text { font-size: 0.75rem; color: #888; display: block; }
+.whatsapp-btn { text-decoration: none; font-size: 20px; margin-right: 10px; }
+.dots-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; }
 
-.time-text { font-size: 0.75rem; color: #888; display: block; margin-top: 2px; }
-.dots-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; padding: 0 10px; }
+/* Status Classes */
+.status-null { color: var(--null-color); font-weight: 700; }
+.status-due { color: var(--debit-color); font-weight: 700; }
+.status-advance { color: var(--credit-color); font-weight: 700; }
 
 /* Modal */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center; padding: 10px; }
 .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 20px; padding: 25px; max-height: 85vh; overflow-y: auto; position: relative; }
 .close-modal { position: absolute; right: 15px; top: 15px; font-size: 24px; cursor: pointer; border: none; background: none; }
-.btn-print { margin-bottom: 15px; padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; background: #f9f9f9; cursor: pointer; font-weight: 600; }
-
-.status-null { color: var(--null-color); font-weight: 700; }
-.status-due { color: var(--debit-color); font-weight: 700; }
-.status-advance { color: var(--credit-color); font-weight: 700; }
-
-@media print {
-    body * { visibility: hidden; }
-    .modal-content, .modal-content * { visibility: visible; }
-    .modal-content { position: absolute; left: 0; top: 0; width: 100%; }
-    .close-modal, .navbar, .btn-print { display: none; }
-}

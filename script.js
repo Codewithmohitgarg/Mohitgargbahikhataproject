@@ -13,14 +13,12 @@ function handleSignup() {
     const shop = document.getElementById('s-name').value;
     const user = document.getElementById('s-user').value.trim();
     const pass = document.getElementById('s-pass').value;
-    if(!user || !pass || !shop) return alert("Please fill all details");
-    if(users[user]) return alert("Username already taken");
-    
+    if(!user || !pass || !shop) return alert("Fill details");
     users[user] = { pass, shop };
     data[user] = {};
     localStorage.setItem('bk_users', JSON.stringify(users));
     localStorage.setItem('bk_data', JSON.stringify(data));
-    alert("Shop Registered! Please Login.");
+    alert("Success! Login now.");
     toggleAuth(false);
 }
 
@@ -33,7 +31,7 @@ function handleLogin() {
         document.getElementById('app-view').style.display = 'block';
         document.getElementById('shop-display-name').innerText = users[u].shop;
         refreshUI();
-    } else alert("Invalid Credentials");
+    } else alert("Invalid Login");
 }
 
 function showSection(id) {
@@ -43,7 +41,7 @@ function showSection(id) {
     document.getElementById('nav-' + id).classList.add('active');
 }
 
-// --- Autocomplete Logic ---
+// --- Autocomplete ---
 function showSuggestions(val) {
     const list = document.getElementById('suggestions');
     const customers = Object.keys(data[currentUser]);
@@ -55,29 +53,34 @@ function showSuggestions(val) {
         filtered.forEach(name => {
             const li = document.createElement('li');
             li.innerText = name;
-            li.onclick = () => { document.getElementById('c-name').value = name; list.style.display = 'none'; };
-            li.ontouchstart = li.onclick;
+            li.onclick = () => { document.getElementById('c-name').value = name; 
+                                 document.getElementById('c-phone').value = data[currentUser][name].phone || '';
+                                 list.style.display = 'none'; };
             list.appendChild(li);
         });
     } else { list.style.display = 'none'; }
 }
 
-// --- Entry Logic ---
-function setEntryType(type) {
-    currentType = type;
-    document.getElementById('type-debit').classList.toggle('active', type === 'debit');
-    document.getElementById('type-credit').classList.toggle('active', type === 'credit');
+function setEntryType(t) {
+    currentType = t;
+    document.getElementById('type-debit').classList.toggle('active', t==='debit');
+    document.getElementById('type-credit').classList.toggle('active', t==='get');
 }
 
+// --- Core Transaction ---
 function saveTransaction() {
     const name = document.getElementById('c-name').value.trim();
+    const phone = document.getElementById('c-phone').value.trim();
     const amt = parseFloat(document.getElementById('t-amount').value);
     const detail = document.getElementById('i-detail').value || '---';
-    if(!name || isNaN(amt)) return alert("Enter Name & Amount");
 
-    if(!data[currentUser][name]) data[currentUser][name] = [];
+    if(!name || isNaN(amt) || !phone) return alert("Enter Name, Phone & Amount");
+
+    if(!data[currentUser][name]) data[currentUser][name] = { phone: phone, entries: [] };
+    else data[currentUser][name].phone = phone;
+
     const now = new Date();
-    data[currentUser][name].push({
+    data[currentUser][name].entries.push({
         detail, amt, type: currentType, 
         date: now.toLocaleDateString(),
         time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -85,9 +88,9 @@ function saveTransaction() {
 
     localStorage.setItem('bk_data', JSON.stringify(data));
     document.getElementById('c-name').value = '';
+    document.getElementById('c-phone').value = '';
     document.getElementById('t-amount').value = '';
-    document.getElementById('i-detail').value = '';
-    document.activeElement.blur(); // Hide keyboard
+    document.activeElement.blur();
     refreshUI();
 }
 
@@ -97,7 +100,7 @@ function refreshUI() {
     histBody.innerHTML = '';
     let allLogs = [];
     for(let name in data[currentUser]) {
-        data[currentUser][name].forEach(log => {
+        data[currentUser][name].entries.forEach(log => {
             net += (log.type === 'credit' ? log.amt : -log.amt);
             allLogs.push({name, ...log});
         });
@@ -123,30 +126,35 @@ function renderLedger() {
     tbody.innerHTML = '';
     for(let name in data[currentUser]) {
         if(!name.toLowerCase().includes(search)) continue;
-        let bal = data[currentUser][name].reduce((acc, log) => log.type === 'credit' ? acc + log.amt : acc - log.amt, 0);
-        let statusClass, statusText;
-        if(bal === 0) { statusClass = 'status-null'; statusText = 'NULL (Settled)'; }
-        else if(bal > 0) { statusClass = 'status-advance'; statusText = 'Advance Received'; }
-        else { statusClass = 'status-due'; statusText = 'Payment Due'; }
+        const cust = data[currentUser][name];
+        let bal = cust.entries.reduce((acc, log) => log.type === 'credit' ? acc + log.amt : acc - log.amt, 0);
+        let statusClass = bal === 0 ? 'status-null' : (bal > 0 ? 'status-advance' : 'status-due');
+        let statusText = bal === 0 ? 'Settled' : (bal > 0 ? 'Advance' : 'Due');
 
         tbody.innerHTML += `<tr>
-            <td><b>${name}</b></td>
+            <td><b>${name}</b><br><small>${cust.phone}</small></td>
             <td class="${statusClass}">${statusText}</td>
             <td><b>$${Math.abs(bal)}</b></td>
-            <td><button class="dots-btn" onclick="openStatement('${name}')">&#8942;</button></td>
+            <td>
+                <a href="javascript:void(0)" class="whatsapp-btn" onclick="sendWhatsApp('${name}')">🟢</a>
+                <button class="dots-btn" onclick="openStatement('${name}')">&#8942;</button>
+            </td>
         </tr>`;
     }
+}
+
+function sendWhatsApp(name) {
+    const cust = data[currentUser][name];
+    let bal = cust.entries.reduce((acc, log) => log.type === 'credit' ? acc + log.amt : acc - log.amt, 0);
+    const msg = `Hello ${name}, your balance at ${users[currentUser].shop} is ₹${Math.abs(bal)} (${bal >= 0 ? 'Advance' : 'Pending'}). Please clear it.`;
+    window.open(`https://wa.me/${cust.phone}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 function openStatement(name) {
     const mBody = document.getElementById('modal-body');
     document.getElementById('modal-cust-name').innerText = name;
     mBody.innerHTML = '';
-    const logs = data[currentUser][name];
-    let bal = logs.reduce((acc, log) => log.type === 'credit' ? acc + log.amt : acc - log.amt, 0);
-    document.getElementById('modal-cust-status').innerText = (bal === 0 ? "Account Settled" : (bal > 0 ? "Advance: $" : "Due: $") + Math.abs(bal));
-    document.getElementById('modal-cust-status').className = (bal === 0 ? 'status-null' : (bal > 0 ? 'status-advance' : 'status-due'));
-    
+    const logs = data[currentUser][name].entries;
     logs.slice().reverse().forEach(log => {
         mBody.innerHTML += `<tr>
             <td>${log.date}<br><small>${log.time}</small></td>
@@ -159,7 +167,4 @@ function openStatement(name) {
 }
 
 function closeModal() { document.getElementById('statement-modal').style.display = 'none'; }
-window.onclick = function(e) { 
-    if(e.target.className === 'modal') closeModal();
-    if(e.target.id !== 'c-name') document.getElementById('suggestions').style.display = 'none';
-}
+window.onclick = function(e) { if(e.target.className === 'modal') closeModal(); }
